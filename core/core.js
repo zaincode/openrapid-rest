@@ -24,7 +24,7 @@ class Core {
 		return {
 			// Required parameters method to Validate if body request 
 			// includes spesific parameter before continue Making further request
-			required : this.handleRequestRequiredParams.bind(this),
+			requires : this.handleRequestRequiredParams.bind(this),
 			// Cathes all missing parameters after validation
 			missingParameters : this.ControllerRequestMissingParameters,
 			// Validate body request
