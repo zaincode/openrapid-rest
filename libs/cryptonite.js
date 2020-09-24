@@ -3,30 +3,37 @@
 // Created at october 28th 2019
 // Version : v.1.0
 
-const crypto = require('crypto');
-const algorithm = 'aes-256-cbc';
-const key = crypto.randomBytes(32);
-const iv = crypto.randomBytes(16);
+const CryptoJS = require('crypto-js');
+
+const CryptoJSAesJson = {
+    stringify: function (cipherParams) {
+        var j = {ct: cipherParams.ciphertext.toString(CryptoJS.enc.Base64)};
+        if (cipherParams.iv) j.iv = cipherParams.iv.toString();
+        if (cipherParams.salt) j.s = cipherParams.salt.toString();
+       return JSON.stringify(j);
+    },
+    parse: function (jsonStr) {
+        var j = JSON.parse(jsonStr);
+        var cipherParams = CryptoJS.lib.CipherParams.create({ciphertext: CryptoJS.enc.Base64.parse(j.ct)});
+        if (j.iv) cipherParams.iv = CryptoJS.enc.Hex.parse(j.iv)
+        if (j.s) cipherParams.salt = CryptoJS.enc.Hex.parse(j.s)
+        return cipherParams;
+    }
+}
 
 let Cryptonite = {
 	aes : {
-		// Nodejs encryption with CTR
-		encrypt(text) {
-		 	let cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(key), iv);
-		 	let encrypted = cipher.update(text);
-		 	encrypted = Buffer.concat([encrypted, cipher.final()]);
-		 	return { iv: iv.toString('hex'), encryptedData: encrypted.toString('hex') };
+		encrypt : (secret, data) => {
+			// Chiper the data
+			const encrypted_text = CryptoJS.AES.encrypt(JSON.stringify(data), secret, {format: CryptoJSAesJson}).toString();
+			return encrypted_text;
 		},
-		decrypt(text) {
-		 	let iv = Buffer.from(text.iv, 'hex');
-		 	let encryptedText = Buffer.from(text.encryptedData, 'hex');
-		 	let decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(key), iv);
-		 	let decrypted = decipher.update(encryptedText);
-		 	decrypted = Buffer.concat([decrypted, decipher.final()]);
-		 	return decrypted.toString();
-		}
-	},
+		decrypt : (secret, encrypted_text) => {
+			// Decrypt the message using CryptoJSAesJson format
+			var decrypted_message = CryptoJS.AES.decrypt( encrypted_text, secret, {format: CryptoJSAesJson} ).toString(CryptoJS.enc.Utf8);
+			return decrypted_message;
+		},
+	}
 }
-
 
 module.exports = Cryptonite;
