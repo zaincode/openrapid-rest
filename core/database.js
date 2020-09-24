@@ -53,7 +53,7 @@ var DatabaseHelper = {
 	tableExposedPage : '',
 	tableDefaultLimit : 10,
 	execute : async (query) => {
-		helper.print.log(`Running MySQL Query '`.green + query.trim() + "'".green);
+		// helper.print.log(`Running MySQL Query '`.green + query.trim() + "'".green);
 		return await pool.query(query);
 	},
 	set_limit : function(limit){
