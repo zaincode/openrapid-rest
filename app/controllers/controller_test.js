@@ -1,6 +1,6 @@
 // This is a controller file.
 // Controller is a class that has methods to act as an endpoint
-// Controller has access to parent methods such ass get and validate requests, sending response back etc.
+// Controller has access to parent methods such as get and validate requests, sending response back etc.
 // It could also has multiple methods or endpoints
 
 class TestController extends require("@core/controller"){
