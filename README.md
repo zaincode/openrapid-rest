@@ -16,7 +16,8 @@ openrapid.js uses prefix to name some of it files in `controllers`, `models` and
 - middleware uses **middleware_**
 
 you can also change the prefix name in config/env.js
-
+**Note** : you dont have to use prefix when you want to call model, defining middleware or controller in your route. just name the file with these prefix.
+ 
 ## How To Use It
 
 There are 2 main thing that you need to focus on to get started
