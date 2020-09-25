@@ -76,12 +76,12 @@ class Core {
 	// Handle validate required paramaters from the body request
 	handleRequestRequiredParams(requireParameters){
 		// Loop each body request 
-		const checkParameters = Object.keys(this.ControllerRequest.body).forEach((param, index) => {
+		requireParameters.map((param, index) => {
 			// Check if body request includes all of required parameters
 			// if some or one of em missing, store the param to missing parameters variable
-			requireParameters.includes(param) == false ? this.ControllerRequestMissingParameters.push(requireParameters[index]) : false
-		});
-		// Returns true if there are no missing parameters
+			typeof this.ControllerRequest.body[param] === "undefined" ? this.ControllerRequestMissingParameters.push(param) : false
+		})
+		// // Returns true if there are no missing parameters
 		return this.ControllerRequestMissingParameters.length === 0 ? true : false;
 	}
 
