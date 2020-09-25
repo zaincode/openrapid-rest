@@ -13,7 +13,7 @@ Clone repository from https://github.com/zaincode/openrapidjs.git or download ma
 openrapid.js uses prefix to name some of it files in `controllers`, `models` and `middlewares`
 - controllers uses **controller_**
 - models uses **model_**
-- middleware **uses middleware_**
+- middleware uses **middleware_**
 
 you can also change the prefix name in config/env.js
 
