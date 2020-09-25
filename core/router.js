@@ -8,6 +8,12 @@ const upload = multer();
 const CONTROLLER_SEPARATOR = "#";
 const packageJsonFile = require('@/package.json');
 
+const asyncForEach = async (array, callback) => {
+    for (let index = 0; index < array.length; index++) {
+    	await callback(array[index], index, array);
+    }
+}
+
 // Start the routing process
 module.exports = async (router, global) => {
 	// Logs the console that the routing is already started
@@ -33,31 +39,32 @@ module.exports = async (router, global) => {
 			// Identifies if middleware success (if exist)
 			var isMiddlewarePassed = true;
 
-			// Loop throught every middleware
-			await $route_middleware.forEach(async middleware => {
+			await asyncForEach($route_middleware, async middleware => {
 				// If previous middleware is passed then continue to the next one
 				if (isMiddlewarePassed == true) {
 					// Import middleware
-					const Middleware = require(env.path.middlewares + env.prefix.middleware + middleware);
+					const Middleware = await require(env.path.middlewares + env.prefix.middleware + middleware);
 					// Call middleware
 					const CallMiddleware = new Middleware(endpoint_parameters);
 					// Find if middleware has run() methods
 					if (typeof CallMiddleware.run !== undefined) {
 						// Call the middleware and look for run() method
 						await CallMiddleware.run();
+						// Get middleware status
+						isMiddlewarePassed = await CallMiddleware.status;
+						// Assign middleware data if exist
+						Object.assign(endpoint_parameters.MiddlewareData, {
+							[middleware] : await CallMiddleware.data
+						});
 						// Print accessed Middleware
 						helper.print.log(`[${CallMiddleware.status == true ? "SUCCESS" : "FAILED"}]`[CallMiddleware.status == true ? "cyan" : "red"] + ` Running Middleware `.white + `${middleware}`.green);
-						// Get middleware status
-						isMiddlewarePassed = CallMiddleware.status;
-						// Assign middleware data if exist
-						Object.assign(endpoint_parameters.MiddlewareData, CallMiddleware.data);
 					}else{
 						isMiddlewarePassed = false;
 						helper.print.log(`Method '${controllerMethodName}' can not be found in ${controllerName} controller `.red);
 						res.status(404).end();
 					}
 				}
-			});
+			})
 
 			// Continue to controller only if middleware value is true
 			if (isMiddlewarePassed == true) {
