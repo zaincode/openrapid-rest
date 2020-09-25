@@ -52,9 +52,23 @@ var DatabaseHelper = {
 	tableExposedRaw : '',
 	tableExposedPage : '',
 	tableDefaultLimit : 10,
+	clearQuery : () => {
+		DatabaseHelper.queryString = '';
+		DatabaseHelper.tableFields = '';
+		DatabaseHelper.tableFieldValues = '';
+		DatabaseHelper.tableCondition = [],
+		DatabaseHelper.tableExposedFields = ["*"];
+		DatabaseHelper.tableExposedOrder = '';
+		DatabaseHelper.tableExposedLimit = '';
+		DatabaseHelper.tableExposedRaw = '';
+		DatabaseHelper.tableExposedPage = '';
+		DatabaseHelper.tableDefaultLimit = 10;
+	},
 	execute : async (query) => {
 		// helper.print.log(`Running MySQL Query '`.green + query.trim() + "'".green);
-		return await pool.query(query);
+		const executeQuery = await pool.query(query);
+		DatabaseHelper.clearQuery();
+		return executeQuery;
 	},
 	set_limit : function(limit){
 		DatabaseHelper.limit = limit;

@@ -22,18 +22,18 @@ const CryptoJSAesJson = {
 }
 
 let Cryptonite = {
-	aes : {
-		encrypt : (secret, data) => {
-			// Chiper the data
-			const encrypted_text = CryptoJS.AES.encrypt(JSON.stringify(data), secret, {format: CryptoJSAesJson}).toString();
-			return encrypted_text;
-		},
-		decrypt : (secret, encrypted_text) => {
-			// Decrypt the message using CryptoJSAesJson format
-			var decrypted_message = CryptoJS.AES.decrypt( encrypted_text, secret, {format: CryptoJSAesJson} ).toString(CryptoJS.enc.Utf8);
-			return decrypted_message;
-		},
-	}
+    aes : {
+        encrypt : (secret, data) => {
+            // Chiper the data
+            const encrypted_text = CryptoJS.AES.encrypt(JSON.stringify(data), secret, {format: CryptoJSAesJson}).toString();
+            return encrypted_text;
+        },
+        decrypt : (secret, encrypted_text) => {
+            // Decrypt the message using CryptoJSAesJson format
+            var decrypted_message = CryptoJS.AES.decrypt( encrypted_text, secret, {format: CryptoJSAesJson} ).toString(CryptoJS.enc.Utf8);
+            return JSON.parse(decrypted_message);
+        },
+    }
 }
 
 module.exports = Cryptonite;
