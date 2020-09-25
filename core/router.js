@@ -34,7 +34,7 @@ module.exports = async (router, global) => {
 			var isMiddlewarePassed = true;
 
 			// Loop throught every middleware
-			await $route_middleware.forEach(middleware => {
+			await $route_middleware.forEach(async middleware => {
 				// If previous middleware is passed then continue to the next one
 				if (isMiddlewarePassed == true) {
 					// Import middleware
@@ -44,7 +44,7 @@ module.exports = async (router, global) => {
 					// Find if middleware has run() methods
 					if (typeof CallMiddleware.run !== undefined) {
 						// Call the middleware and look for run() method
-						CallMiddleware.run();
+						await CallMiddleware.run();
 						// Print accessed Middleware
 						helper.print.log(`[${CallMiddleware.status == true ? "SUCCESS" : "FAILED"}]`[CallMiddleware.status == true ? "cyan" : "red"] + ` Running Middleware `.white + `${middleware}`.green);
 						// Get middleware status
