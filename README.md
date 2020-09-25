@@ -125,5 +125,10 @@ run() {
 ```
 if there are some situation where middleware fails to proccess something you can just send response back to client using `this.response.send()`
 
+### Run 
+```npm
+nodemon start
+```
+
 ### Error Fixes
 feel free to contact me if there is some error or any advice in zainroyan.personal@gmail.com or DM me on insta https://www.instagram.com/zain_royan/?hl=id :)
