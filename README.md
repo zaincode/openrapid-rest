@@ -100,7 +100,7 @@ your middleware file should look like this :
 ```javascript 
 class UserMiddleware extends require("@core/middleware"){
   // This contstructor is important
-	// Every middleware should have this method
+  // Every middleware should have this method
   constructor(params) {
     super(params);
   }
@@ -123,4 +123,4 @@ run() {
   this.next({ hello : "World" });
 }
 ```
-if there are some situation where middleware fails to proccess something you can just send response back to client using `this.response.send()` method
+if there are some situation where middleware fails to proccess something you can just send response back to client using `this.response.send()`
