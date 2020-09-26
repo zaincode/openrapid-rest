@@ -53,9 +53,7 @@ class Core {
 
 	// Get middleware data
 	get middleware(){
-		return {
-			data : this.ControllerMiddlewareData
-		}
+		return this.ControllerMiddlewareData;
 	}
 
 	// Model Factory
