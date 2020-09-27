@@ -24,19 +24,22 @@ class Controller extends require("@core/core") {
 						this.ControllerRequest.files.forEach((file, index) => {
 							// If file fieldname matches with the one that is going to be stored
 							if (file.fieldname == fileName) {
-								const directoryPath = env.path.storage + destination  + "/";
+								const originalFileName = this.ControllerRequest.files[index].originalname;
+								const newFileName =  typeof destination == "object" && destination.as !== undefined ? destination.as + originalFileName.substr(originalFileName.lastIndexOf(".")) : originalFileName;
+								const fileDestination = typeof destination == "string" ? destination + "/" : destination.to + "/";
+								const directoryPath = env.path.storage + fileDestination;
 								// Creates a pointer
 								var self = this;
 								// Check if directory found
 								if (fs.existsSync(directoryPath)) {
 									// Begin writing file and store it to ./app/storage/ directory
-									fs.writeFileSync(directoryPath + this.ControllerRequest.files[index].originalname, this.ControllerRequest.files[index].buffer); 
+									fs.writeFileSync(directoryPath + newFileName, this.ControllerRequest.files[index].buffer); 
 								}else{
 									// Directory is not found
 									// Check if user wants to create a new dir
 									createNewDir === true ? self.handleCreateNewDirectory(directoryPath) : null;
 									// Do the file saving thing again after created a new dir
-									createNewDir === true ? fs.writeFileSync(directoryPath + this.ControllerRequest.files[index].originalname, this.ControllerRequest.files[index].buffer) : helper.print.log(`${directoryPath} directory can't be found`.red); 
+									createNewDir === true ? fs.writeFileSync(directoryPath + newFileName, this.ControllerRequest.files[index].buffer) : helper.print.log(`${directoryPath} directory can't be found`.red); 
 								}
 							}
 						})
