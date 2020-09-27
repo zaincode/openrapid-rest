@@ -12,16 +12,23 @@ class Controller extends require("@core/core") {
 		return fs.mkdirSync(directory);
 	}
 
+	async asyncForEach (array, callback){
+	    for (let index = 0; index < array.length; index++) {
+	    	await callback(array[index], index, array);
+	    }
+	}
+
 	// Storage handler
 	get storage(){
 		return {
 			file : {
 				// Save a new file into storage directory
-				save : (fileName = "", destination = "", createNewDir = false) => {
+				save : async (fileName = "", destination = "", createNewDir = false) => {
 					// If field input is exist
 					if (this.ControllerRequest.files !== undefined) {
+						var isFilesUploaded = false;
 						// Loop through every files
-						this.ControllerRequest.files.forEach((file, index) => {
+						await this.asyncForEach(this.ControllerRequest.files, (file, index) => {
 							// If file fieldname matches with the one that is going to be stored
 							if (file.fieldname == fileName) {
 								const originalFileName = this.ControllerRequest.files[index].originalname;
@@ -34,15 +41,24 @@ class Controller extends require("@core/core") {
 								if (fs.existsSync(directoryPath)) {
 									// Begin writing file and store it to ./app/storage/ directory
 									fs.writeFileSync(directoryPath + newFileName, this.ControllerRequest.files[index].buffer); 
+									if (!fs.existsSync(directoryPath + newFileName)) {
+										isFilesUploaded = false;
+									}
+									isFilesUploaded = true;
 								}else{
 									// Directory is not found
 									// Check if user wants to create a new dir
 									createNewDir === true ? self.handleCreateNewDirectory(directoryPath) : null;
 									// Do the file saving thing again after created a new dir
 									createNewDir === true ? fs.writeFileSync(directoryPath + newFileName, this.ControllerRequest.files[index].buffer) : helper.print.log(`${directoryPath} directory can't be found`.red); 
+									if (!fs.existsSync(directoryPath + newFileName)) {
+										isFilesUploaded = false;
+									}
+									isFilesUploaded = true;
 								}
 							}
-						})
+						});
+						return isFilesUploaded;
 					}else{
 						return false;
 					}
