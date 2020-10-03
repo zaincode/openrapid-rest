@@ -51,7 +51,8 @@ var DatabaseHelper = {
 	tableExposedLimit : '',
 	tableExposedRaw : '',
 	tableExposedPage : '',
-	tableDefaultLimit : 10,
+	tableExposedJoin : '',
+	tableDefaultLimit : 25,
 	clearQuery : () => {
 		DatabaseHelper.queryString = '';
 		DatabaseHelper.tableFields = '';
@@ -59,10 +60,11 @@ var DatabaseHelper = {
 		DatabaseHelper.tableCondition = [],
 		DatabaseHelper.tableExposedFields = ["*"];
 		DatabaseHelper.tableExposedOrder = '';
+		DatabaseHelper.tableExposedJoin = '';
 		DatabaseHelper.tableExposedLimit = '';
 		DatabaseHelper.tableExposedRaw = '';
 		DatabaseHelper.tableExposedPage = '';
-		DatabaseHelper.tableDefaultLimit = 10;
+		DatabaseHelper.tableDefaultLimit = 25;
 	},
 	execute : async (query) => {
 		// helper.print.log(`Running MySQL Query '`.green + query.trim() + "'".green);
@@ -87,9 +89,9 @@ var DatabaseHelper = {
 					// Add key into tableFields variable
 					DatabaseHelper.tableFields += key + ", ";
 					if(key == 'id' && key != '' && key != undefined){
-						DatabaseHelper.tableFieldValues += "'" + values[key] + "', ";
+						DatabaseHelper.tableFieldValues += mysql.escape(values[key]) + ", ";
 					}else{
-						DatabaseHelper.tableFieldValues += "'" + values[key] + "', ";
+						DatabaseHelper.tableFieldValues +=  mysql.escape(values[key]) + ", ";
 					}
 				});
 				// Extract table columns
@@ -124,9 +126,17 @@ var DatabaseHelper = {
 
 				if (typeof args !== undefined) {
 					if (args.page  !== undefined) {
-						var limit = DatabaseHelper.tableDefaultLimit;
+						var limit = args.limit !== undefined ? args.limit : DatabaseHelper.tableDefaultLimit;
 						var offset = (args.page - 1) * limit;
 						DatabaseHelper.tableExposedPage = ` LIMIT ${limit} OFFSET ${offset} `;
+					}
+				}
+
+				if (typeof args !== undefined) {
+					if (args.join !== undefined) {
+						args.join.map(join => {
+							DatabaseHelper.tableExposedJoin = ` INNER JOIN ${join.table} ON ${join.on} `;
+						});
 					}
 				}
 
@@ -135,11 +145,12 @@ var DatabaseHelper = {
 					${DatabaseHelper.tableExposedFields.join(", ")} 
 					FROM 
 					${tableName} 
+					${DatabaseHelper.tableExposedJoin}
 					${DatabaseHelper.tableCondition.length > 0 ? "WHERE" : ""} 
 					${DatabaseHelper.tableCondition.join(' AND ')} 
-					${args !== undefined && args.orderBy !== undefined ? "ORDER BY " + args.orderBy[0] + "  " + args.orderBy[1] : ""} 
+					${args !== undefined && args.orderBy !== undefined ? " ORDER BY " + args.orderBy[0] + "  " + args.orderBy[1] : ""} 
 					${DatabaseHelper.tableExposedPage}
-					${args !== undefined && args.limit !== undefined ? "LIMIT " + args.limit : ""} 
+					${args !== undefined && args.limit !== undefined && DatabaseHelper.tableExposedPage == '' ? " LIMIT " + args.limit : ""} 
 					${args !== undefined && args.offset !== undefined ? " OFFSET " + args.offset : ""} 
 					${args !== undefined && args.extra !== undefined ? args.extra : ""}
 				`;
@@ -195,22 +206,26 @@ var DatabaseHelper = {
 			},
 			// Updates table with certain conditions
 			update : async (dataSets = {}, where = {}) => {
-				var updatedDataSets = "";
+				var updatedDataSets = [];
 				if(Object.keys(dataSets).length > 0){
 					Object.keys(dataSets).forEach(data => {
-						updatedDataSets += `${data} = '${dataSets[data]}' `;
+						updatedDataSets.push(`${data} = ${mysql.escape(dataSets[data])}`);
 					});
 				}
 				if(Object.keys(where).length > 0){
-					Object.keys(where).forEach(condition => {
-						DatabaseHelper.tableCondition.push(`${condition} = '${where[condition]}' `);
+					Object.keys(where).forEach((condition, index) => {
+						if (index == 0) {
+							DatabaseHelper.tableCondition.push(`${condition} = '${where[condition]}'`);
+						}else{
+							DatabaseHelper.tableCondition.push(`${condition} = '${where[condition]}',`);
+						}
 					});
 				}
 				const executeQuery = await DatabaseHelper.execute(`
 					UPDATE  
 						${tableName} 
 					SET
-						${updatedDataSets.join(', ')} 
+						${updatedDataSets.join(", ")} 
 						${DatabaseHelper.tableCondition.length > 0 ? "WHERE" : ""} 
 						${DatabaseHelper.tableCondition.join(' AND ')} 
 				`);
