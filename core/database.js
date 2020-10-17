@@ -52,7 +52,7 @@ var DatabaseHelper = {
 	tableExposedRaw : '',
 	tableExposedPage : '',
 	tableExposedJoin : '',
-	tableDefaultLimit : 25,
+	tableDefaultLimit : 30,
 	clearQuery : () => {
 		DatabaseHelper.queryString = '';
 		DatabaseHelper.tableFields = '';
@@ -64,7 +64,7 @@ var DatabaseHelper = {
 		DatabaseHelper.tableExposedLimit = '';
 		DatabaseHelper.tableExposedRaw = '';
 		DatabaseHelper.tableExposedPage = '';
-		DatabaseHelper.tableDefaultLimit = 25;
+		DatabaseHelper.tableDefaultLimit = 30;
 	},
 	execute : async (query) => {
 		// helper.print.log(`Running MySQL Query '`.green + query.trim() + "'".green);
@@ -84,22 +84,24 @@ var DatabaseHelper = {
 		return {
 			// Insert data into database
 			insert : async (values) => {
+				var tableFields = "";
+				var tableFieldValues = "";
 				// Loop each object and get the key
 				Object.keys(values).forEach(key => {
 					// Add key into tableFields variable
-					DatabaseHelper.tableFields += key + ", ";
+					tableFields += key + ", ";
 					if(key == 'id' && key != '' && key != undefined){
-						DatabaseHelper.tableFieldValues += mysql.escape(values[key]) + ", ";
+						tableFieldValues += mysql.escape(values[key]) + ", ";
 					}else{
-						DatabaseHelper.tableFieldValues +=  mysql.escape(values[key]) + ", ";
+						tableFieldValues +=  mysql.escape(values[key]) + ", ";
 					}
 				});
 				// Extract table columns
-				DatabaseHelper.tableFields = DatabaseHelper.tableFields.substr(0, DatabaseHelper.tableFields.length - 2);
+				tableFields = tableFields.substr(0, tableFields.length - 2);
 				// Extract table field values
-				DatabaseHelper.tableFieldValues = DatabaseHelper.tableFieldValues.substr(0, DatabaseHelper.tableFieldValues.length - 2);
+				tableFieldValues = tableFieldValues.substr(0, tableFieldValues.length - 2);
 				// Build the query string
-				DatabaseHelper.queryString = `INSERT INTO ${tableName} (${DatabaseHelper.tableFields}) VALUES (${DatabaseHelper.tableFieldValues})`;
+				DatabaseHelper.queryString = `INSERT INTO ${tableName} (${tableFields}) VALUES (${tableFieldValues})`;
 				const executeQuery = await DatabaseHelper.execute(DatabaseHelper.queryString);
 				// If data successfully inserted
 				if (executeQuery.affectedRows > 0) {
@@ -214,11 +216,7 @@ var DatabaseHelper = {
 				}
 				if(Object.keys(where).length > 0){
 					Object.keys(where).forEach((condition, index) => {
-						if (index == 0) {
-							DatabaseHelper.tableCondition.push(`${condition} = '${where[condition]}'`);
-						}else{
-							DatabaseHelper.tableCondition.push(`${condition} = '${where[condition]}',`);
-						}
+						DatabaseHelper.tableCondition.push(`${condition} = '${where[condition]}'`);
 					});
 				}
 				const executeQuery = await DatabaseHelper.execute(`
