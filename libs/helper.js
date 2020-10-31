@@ -1,6 +1,6 @@
-var CryptoJS = require("crypto-js"), moment = require('moment');
-var colors = require('colors');
-var fs = require("fs");
+const CryptoJS = require("crypto-js"), moment = require('moment'), 
+colors = require('colors'), 
+fs = require("fs");
 
 let Helper = {
     print : {
@@ -98,6 +98,13 @@ let Helper = {
     hash: function(string, key = "") {
         return CryptoJS.SHA256(string);
     },
+    secure : {
+        RSA : {
+            encrypt : function () {
+
+            }
+        }
+    }
 };
 
 module.exports = Helper;

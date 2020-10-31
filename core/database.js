@@ -67,20 +67,32 @@ var DatabaseHelper = {
 		DatabaseHelper.tableDefaultLimit = 30;
 	},
 	execute : async (query) => {
-		// helper.print.log(`Running MySQL Query '`.green + query.trim() + "'".green);
-		const executeQuery = await pool.query(query);
-		DatabaseHelper.clearQuery();
-		return executeQuery;
-	},
-	set_limit : function(limit){
+		try {
+			const executeQuery = await pool.query(query);
+			DatabaseHelper.clearQuery();
+			return executeQuery;
+		} catch(e) {
+			helper.print.error(`[ERROR] ${"[".yellow + e.code.yellow}` + `] `.yellow + `${e.message.replace(e.code, "")} at '`.red + query + "'".red);
+			return false;
+		}
+	},	
+	setLimit : function(limit){
 		DatabaseHelper.limit = limit;
 	},
-	raw : function(sqlQuery){
-		helper.print.log(`Running MySQL Query '`.green + sqlQuery + "'".green);
-		return pool.query(sqlQuery);
+	$ : (sqlQuery) => {
+		return {
+			async execute() {
+				try {
+					return await pool.query(sqlQuery);
+				} catch(e) {
+					helper.print.error(`[ERROR] ${"[".yellow + e.code.yellow}` + `] `.yellow + `${e.message.replace(e.code, "")} at '`.red + sqlQuery + "'".red);
+					return false;
+				}
+			}
+		}
 	},
 	table : (tableName) => {
-		// Available methods
+		// Available database manipulation methods methods
 		return {
 			// Insert data into database
 			insert : async (values) => {
@@ -240,9 +252,27 @@ var DatabaseHelper = {
 	}
 }
 
+const sqlProcedures = async () => {
+	const databaseProcedure = await DatabaseHelper.execute(`
+		SHOW PROCEDURE STATUS WHERE Db = '${db_config.database}'
+	`);
+	var returnedProcedures = {};
+	databaseProcedure.forEach(procedure => {
+		Object.assign(returnedProcedures, {[procedure.Name] : async (params) => {
+			return await DatabaseHelper.execute(`CALL ${procedure.Name}(${params})`);
+		} })
+	})
+	return returnedProcedures;
+}
+
 module.exports = async () => {
 	let connection = await pool;
 	// Assign wether database is connected or not
+	// Assign database procedures as a javascript function
+	db_config.use_procedure !== undefined && db_config.use_procedure == true ? 
+	await Object.assign(pool, {
+		$call : await sqlProcedures()
+	}) : false;
 	// Assign Database helper
 	await Object.assign(pool, DatabaseHelper);
 	// Returns connection

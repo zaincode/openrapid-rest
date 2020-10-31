@@ -3,15 +3,10 @@
 // Controller has access to parent methods such as get and validate requests, sending response back etc.
 // It could also has multiple methods or endpoints
 
-class TestController extends require("@core/controller"){
-	
-	// Constructor has be present in every controller
-	constructor(params) {
-		super(params);
-	}
+module.exports = class extends require("@core/controller"){
 
 	// index() {
-	// 	// If there is no method defined in route controller
+	// // If there is no method defined in route controller
 	// // System will automatically look for index method inside the controller
 	// 	console.log("This is an index controller")
 	// }
@@ -25,6 +20,3 @@ class TestController extends require("@core/controller"){
 		});
 	}
 }
-
-// Dont forget to export the controller
-module.exports = TestController;
