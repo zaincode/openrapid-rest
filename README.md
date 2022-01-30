@@ -1,3 +1,6 @@
+## ** Theres a newer version of this framework which is [openrapid-js](https://github.com/zaincode/openrapid-js), you should check it out
+
+
 # openrapid.js
 
 openrapid.js is a modular API Framework built over NodeJS and ExpressJS. openrapid uses popular MC workflow such as laravel (in PHP). it is lightweight and easy to get started with.
